@@ -54,6 +54,8 @@ call:
 	MICRO_REGISTRY=consul micro call omo.msa.group Member.Add '{"collection":"098f6bcd4621d373cade4e832627b4f6", "element":"0003"}'
 	MICRO_REGISTRY=consul micro call omo.msa.group Member.Add '{"collection":"5a105e8b9d40e1329780d62ea2265d8a", "element":"0001"}'
 	MICRO_REGISTRY=consul micro call omo.msa.group Member.Add '{"collection":"5a105e8b9d40e1329780d62ea2265d8a", "element":"0002"}'
+	# 定位成员
+	MICRO_REGISTRY=consul micro call omo.msa.group Member.Where '{"element":"0002"}'
 	# 列举成员,集合不存在
 	MICRO_REGISTRY=consul micro call omo.msa.group Member.List '{"collection":"00000000"}'
 	# 列举成员

@@ -135,3 +135,27 @@ func (this *MemberDAO) QueryOne(_query *MemberQuery) (*Member, error) {
 	}
 	return &member, err
 }
+
+func (this *MemberDAO) QueryMany(_query *MemberQuery) ([]*Member, error) {
+	db := this.conn.DB.Model(&Member{})
+	hasWhere := false
+	if "" != _query.UUID{
+		db = db.Where("uuid = ?", _query.UUID)
+		hasWhere = true
+	}
+	if "" != _query.Collection{
+		db = db.Where("collection = ?", _query.Collection)
+		hasWhere = true
+	}
+	if "" != _query.Element{
+		db = db.Where("element = ?", _query.Element)
+		hasWhere = true
+	}
+	if !hasWhere {
+		return nil, ErrMemberNotFound
+	}
+
+	var members []*Member
+	err := db.Find(&members).Error
+	return members, err
+}

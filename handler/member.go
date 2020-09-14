@@ -171,3 +171,32 @@ func (this *Member) List(_ctx context.Context, _req *proto.MemberListRequest, _r
 	publisher.Publish(ctx, "member/list", "", fmt.Sprintf("%v", _req))
 	return nil
 }
+
+func (this *Member) Where(_ctx context.Context, _req *proto.MemberWhereRequest, _rsp *proto.MemberWhereResponse) error {
+	logger.Infof("Received Member.Where, req is %v", _req)
+	_rsp.Status = &proto.Status{}
+
+	if "" == _req.Element{
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "element is required"
+		return nil
+	}
+
+	dao := model.NewMemberDAO(nil)
+    query := model.MemberQuery {
+        Element: _req.Element,
+    }
+	members, err := dao.QueryMany(&query)
+	if nil != err {
+		return nil
+	}
+
+	_rsp.Collection = make([]string, len(members))
+	for i, member := range members {
+		_rsp.Collection[i] = member.Collection;
+	}
+
+	ctx := buildNotifyContext(_ctx, "root")
+	publisher.Publish(ctx, "member/where", "", fmt.Sprintf("%v", _req))
+	return nil
+}
