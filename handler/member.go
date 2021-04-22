@@ -3,12 +3,10 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
-	"omo-msa-group/model"
-	"omo-msa-group/publisher"
+	"ogm-msa-group/model"
 
 	"github.com/micro/go-micro/v2/logger"
-	proto "github.com/xtech-cloud/omo-msp-group/proto/group"
+	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
 type Member struct{}
@@ -72,8 +70,6 @@ func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp
 		return err
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "member/add", "", fmt.Sprintf("%v", _req))
 	return nil
 }
 
@@ -103,8 +99,6 @@ func (this *Member) Get(_ctx context.Context, _req *proto.MemberGetRequest, _rsp
 		Element:    member.Element,
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "member/get", "", fmt.Sprintf("%v", _req))
 	return nil
 }
 
@@ -125,9 +119,6 @@ func (this *Member) Remove(_ctx context.Context, _req *proto.MemberRemoveRequest
 		_rsp.Status.Message = err.Error()
 		return nil
 	}
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "member/remove", "", fmt.Sprintf("%v", _req))
-
 	return nil
 }
 
@@ -167,8 +158,6 @@ func (this *Member) List(_ctx context.Context, _req *proto.MemberListRequest, _r
 		}
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "member/list", "", fmt.Sprintf("%v", _req))
 	return nil
 }
 
@@ -196,7 +185,5 @@ func (this *Member) Where(_ctx context.Context, _req *proto.MemberWhereRequest, 
 		_rsp.Collection[i] = member.Collection;
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "member/where", "", fmt.Sprintf("%v", _req))
 	return nil
 }

@@ -4,17 +4,16 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"io"
-	"omo-msa-group/config"
-	"omo-msa-group/handler"
-	"omo-msa-group/model"
-	"omo-msa-group/publisher"
+	"ogm-msa-group/config"
+	"ogm-msa-group/handler"
+	"ogm-msa-group/model"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/logger"
-	proto "github.com/xtech-cloud/omo-msp-group/proto/group"
+	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
 func main() {
@@ -34,9 +33,6 @@ func main() {
 
 	// Initialise service
 	service.Init()
-
-	// Register publisher
-	publisher.DefaultPublisher = micro.NewPublisher(config.Schema.Service.Name + ".notification", service.Client())
 
 	// Register Handler
 	proto.RegisterHealthyHandler(service.Server(), new(handler.Healthy))

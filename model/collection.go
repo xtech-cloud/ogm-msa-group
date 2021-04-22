@@ -3,8 +3,6 @@ package model
 import (
 	"errors"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Collection struct {
@@ -19,7 +17,7 @@ var ErrCollectionExists = errors.New("collection exists")
 var ErrCollectionNotFound = errors.New("collection not found")
 
 func (Collection) TableName() string {
-	return "msa_group_collection"
+	return "ogm_group_collection"
 }
 
 type CollectionQuery struct {
@@ -101,14 +99,15 @@ func (this *CollectionDAO) QueryOne(_query *CollectionQuery) (*Collection, error
 		db = db.Where("uuid = ?", _query.UUID)
 		hasWhere = true
 	}
+    // 没有where子句时，返回未找到错误
 	if !hasWhere {
 		return nil, ErrCollectionNotFound
 	}
 
-	var Collection Collection
-	err := db.First(&Collection).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrCollectionNotFound
-	}
-	return &Collection, err
+	var collection Collection
+	err := db.Limit(1).Find(&collection).Error
+    if collection.UUID == "" {
+        return nil ,ErrCollectionNotFound
+    }
+	return &collection, err
 }

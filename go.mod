@@ -1,4 +1,4 @@
-module omo-msa-group
+module ogm-msa-group
 
 go 1.13
 
@@ -11,11 +11,9 @@ require (
 	github.com/micro/go-plugins/registry/etcdv3/v2 v2.9.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/xtech-cloud/omo-msp-account v1.13.0
-	github.com/xtech-cloud/omo-msp-group v1.2.0
-	github.com/xtech-cloud/omo-msp-notification v1.0.0
+	github.com/xtech-cloud/ogm-msp-group v1.2.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.21.3
+	gorm.io/gorm v1.21.6
 )

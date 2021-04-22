@@ -1,15 +1,13 @@
 package handler
 
 import (
-    "fmt"
 	"context"
 	"errors"
-	"omo-msa-group/config"
-	"omo-msa-group/model"
-	"omo-msa-group/publisher"
+	"ogm-msa-group/config"
+	"ogm-msa-group/model"
 
 	"github.com/micro/go-micro/v2/logger"
-	proto "github.com/xtech-cloud/omo-msp-group/proto/group"
+	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
 type Collection struct{}
@@ -44,8 +42,6 @@ func (this *Collection) Make(_ctx context.Context, _req *proto.CollectionMakeReq
 		return nil
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "collection/make", "", fmt.Sprintf("%v", _req))
 	return err
 }
 
@@ -85,8 +81,6 @@ func (this *Collection) List(_ctx context.Context, _req *proto.CollectionListReq
 		}
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "collection/list", "", fmt.Sprintf("%v", _req))
 	return nil
 }
 
@@ -107,8 +101,6 @@ func (this *Collection) Remove(_ctx context.Context, _req *proto.CollectionRemov
 		_rsp.Status.Message = err.Error()
 		return nil
 	}
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "collection/remove", "", fmt.Sprintf("%v", _req))
 	return err
 }
 
@@ -132,13 +124,16 @@ func (this *Collection) Get(_ctx context.Context, _req *proto.CollectionGetReque
 		_rsp.Status.Message = err.Error()
 		return nil
 	}
+    if collection.UUID == "" {
+		_rsp.Status.Code = 2
+		_rsp.Status.Message = "not found"
+		return nil
+    }
 	_rsp.Entity = &proto.CollectionEntity{
 		Uuid:     collection.UUID,
 		Name:     collection.Name,
 		Capacity: collection.Capacity,
 	}
 
-	ctx := buildNotifyContext(_ctx, "root")
-	publisher.Publish(ctx, "collection/get", "", fmt.Sprintf("%v", _req))
 	return nil
 }

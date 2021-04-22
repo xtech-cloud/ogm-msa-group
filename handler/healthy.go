@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro/go-micro/v2/logger"
 
-	proto "github.com/xtech-cloud/omo-msp-group/proto/group"
+	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
 type Healthy struct{}

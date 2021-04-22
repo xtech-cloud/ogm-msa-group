@@ -2,30 +2,20 @@ package config
 
 const defaultYAML string = `
 service:
-  name: omo.api.msa.group
+  name: xtc.api.ogm.group
   address: :9609
   ttl: 15
   interval: 10
 logger:
-  level: info
-  dir: /var/log/msa/
+  level: trace
+  dir: /var/log/ogm/
 database:
   lite: true
-  timeout: 10
   mysql:
-    address: 127.0.0.1:3306
+    address: localhost:3306
     user: root
     password: mysql@OMO
-    db: msa_group
+    db: ogm
   sqlite:
-    path: /tmp/msa-group.db
-publisher:
-- /collection/make
-- /collection/list
-- /collection/remove
-- /collection/get
-- /member/add
-- /member/remove
-- /member/list
-- /member/get
+    path: /tmp/ogm-group.db
 `

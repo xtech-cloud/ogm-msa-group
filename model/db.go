@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"omo-msa-group/config"
+	"ogm-msa-group/config"
 
 	"gorm.io/gorm"
 	"gorm.io/driver/sqlite"

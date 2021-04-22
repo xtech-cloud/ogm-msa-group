@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -18,7 +17,7 @@ var ErrMemberExists = errors.New("member exists")
 var ErrMemberNotFound = errors.New("member not found")
 
 func (Member) TableName() string {
-	return "msa_file_Member"
+	return "ogm_group_member"
 }
 
 type MemberDAO struct {
@@ -26,7 +25,7 @@ type MemberDAO struct {
 }
 
 type MemberQuery struct {
-	UUID string
+	UUID       string
 	Collection string
 	Element    string
 }
@@ -49,10 +48,10 @@ func (this *MemberDAO) Count() (int64, error) {
 
 func (this *MemberDAO) CountOfCollection(_collection string) (int64, error) {
 	var count int64
-    db := this.conn.DB.Model(&Member{})
-    if "" != _collection {
-        db = db.Where("collection = ?", _collection)
-    }
+	db := this.conn.DB.Model(&Member{})
+	if "" != _collection {
+		db = db.Where("collection = ?", _collection)
+	}
 	err := db.Count(&count).Error
 	return count, err
 }
@@ -102,7 +101,7 @@ func (this *MemberDAO) Delete(_uuid string) error {
 func (this *MemberDAO) List(_offset int64, _count int64, _collection string) ([]*Member, error) {
 	var members []*Member
 	db := this.conn.DB
-	if "" != _collection{
+	if "" != _collection {
 		db = db.Where("collection = ?", _collection)
 	}
 	res := db.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&members)
@@ -112,15 +111,15 @@ func (this *MemberDAO) List(_offset int64, _count int64, _collection string) ([]
 func (this *MemberDAO) QueryOne(_query *MemberQuery) (*Member, error) {
 	db := this.conn.DB.Model(&Member{})
 	hasWhere := false
-	if "" != _query.UUID{
+	if "" != _query.UUID {
 		db = db.Where("uuid = ?", _query.UUID)
 		hasWhere = true
 	}
-	if "" != _query.Collection{
+	if "" != _query.Collection {
 		db = db.Where("collection = ?", _query.Collection)
 		hasWhere = true
 	}
-	if "" != _query.Element{
+	if "" != _query.Element {
 		db = db.Where("element = ?", _query.Element)
 		hasWhere = true
 	}
@@ -129,8 +128,8 @@ func (this *MemberDAO) QueryOne(_query *MemberQuery) (*Member, error) {
 	}
 
 	var member Member
-	err := db.First(&member).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	err := db.Limit(1).Find(&member).Error
+	if member.UUID == "" {
 		return nil, ErrMemberNotFound
 	}
 	return &member, err
@@ -139,15 +138,15 @@ func (this *MemberDAO) QueryOne(_query *MemberQuery) (*Member, error) {
 func (this *MemberDAO) QueryMany(_query *MemberQuery) ([]*Member, error) {
 	db := this.conn.DB.Model(&Member{})
 	hasWhere := false
-	if "" != _query.UUID{
+	if "" != _query.UUID {
 		db = db.Where("uuid = ?", _query.UUID)
 		hasWhere = true
 	}
-	if "" != _query.Collection{
+	if "" != _query.Collection {
 		db = db.Where("collection = ?", _query.Collection)
 		hasWhere = true
 	}
-	if "" != _query.Element{
+	if "" != _query.Element {
 		db = db.Where("element = ?", _query.Element)
 		hasWhere = true
 	}
