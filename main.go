@@ -4,15 +4,16 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"io"
-	"ogm-msa-group/config"
-	"ogm-msa-group/handler"
-	"ogm-msa-group/model"
+	"ogm-group/config"
+	"ogm-group/handler"
+	"ogm-group/model"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/logger"
+    "github.com/asim/go-micro/v3"
+    "github.com/asim/go-micro/v3/logger"
+    "github.com/asim/go-micro/plugins/server/grpc/v3"
 	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
@@ -24,6 +25,7 @@ func main() {
 
 	// New Service
 	service := micro.NewService(
+        micro.Server(grpc.NewServer()),
 		micro.Name(config.Schema.Service.Name),
 		micro.Version(BuildVersion),
 		micro.RegisterTTL(time.Second*time.Duration(config.Schema.Service.TTL)),

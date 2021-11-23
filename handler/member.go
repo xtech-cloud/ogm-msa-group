@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"errors"
-	"ogm-msa-group/model"
+	"ogm-group/model"
 
-	"github.com/micro/go-micro/v2/logger"
+    "github.com/asim/go-micro/v3/logger"
 	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 

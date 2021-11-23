@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"ogm-msa-group/config"
+	"ogm-group/config"
+	"time"
 
-	"gorm.io/gorm"
-	"gorm.io/driver/sqlite"
-	"gorm.io/driver/mysql"
-	"github.com/micro/go-micro/v2/logger"
+	"github.com/asim/go-micro/v3/logger"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var base64Coder = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
@@ -23,41 +24,52 @@ type Conn struct {
 var DefaultConn *Conn
 
 func Setup() {
-    var err error
-    var db *gorm.DB
+	var err error
+	var db *gorm.DB
 
-	if config.Schema.Database.Lite {
-        dsn := config.Schema.Database.SQLite.Path
+	if "sqlite" == config.Schema.Database.Driver {
+		dsn := config.Schema.Database.SQLite.Path
 		logger.Warnf("!!! Database is lite mode, file at %v", dsn)
-        db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
-	} else {
+		db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	} else if "mysql" == config.Schema.Database.Driver {
 		mysql_addr := config.Schema.Database.MySQL.Address
 		mysql_user := config.Schema.Database.MySQL.User
 		mysql_passwd := config.Schema.Database.MySQL.Password
 		mysql_db := config.Schema.Database.MySQL.DB
-        dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True", mysql_user, mysql_passwd, mysql_addr, mysql_db)
-        db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True", mysql_user, mysql_passwd, mysql_addr, mysql_db)
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		sqlDB, err := db.DB()
+		if nil != err {
+			panic(err)
+		}
+		sqlDB.SetConnMaxIdleTime(time.Minute * time.Duration(config.Schema.Database.MySQL.MaxIdleTime))
+		sqlDB.SetConnMaxLifetime(time.Minute * time.Duration(config.Schema.Database.MySQL.MaxLifeTime))
+		sqlDB.SetMaxIdleConns(config.Schema.Database.MySQL.MaxIdleConns)
+		sqlDB.SetMaxOpenConns(config.Schema.Database.MySQL.MaxOpenConns)
+
+	} else {
+		panic("the driver of database is missing")
 	}
 
-    if nil != err {
-        logger.Fatal(err)
-    }
+	if nil != err {
+		logger.Fatal(err)
+	}
 	DefaultConn = &Conn{
-        DB: db,
-    }
+		DB: db,
+	}
 }
 
 func Cancel() {
 }
 
 func AutoMigrateDatabase() {
-    err := DefaultConn.DB.AutoMigrate(&Collection{})
+	err := DefaultConn.DB.AutoMigrate(&Collection{})
 	if nil != err {
-        logger.Fatal(err)
+		logger.Fatal(err)
 	}
-    err = DefaultConn.DB.AutoMigrate(&Member{})
+	err = DefaultConn.DB.AutoMigrate(&Member{})
 	if nil != err {
-        logger.Fatal(err)
+		logger.Fatal(err)
 	}
 }
 

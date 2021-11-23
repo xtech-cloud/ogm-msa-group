@@ -3,10 +3,9 @@ package handler
 import (
 	"context"
 	"errors"
-	"ogm-msa-group/config"
-	"ogm-msa-group/model"
+	"ogm-group/model"
 
-	"github.com/micro/go-micro/v2/logger"
+    "github.com/asim/go-micro/v3/logger"
 	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
@@ -22,11 +21,7 @@ func (this *Collection) Make(_ctx context.Context, _req *proto.CollectionMakeReq
 		return nil
 	}
 
-	// 本地数据库使用存储桶名生成UUID，方便测试和开发
 	uuid := model.NewUUID()
-	if config.Schema.Database.Lite {
-		uuid = model.ToUUID(_req.Name)
-	}
 
 	Collection := &model.Collection{
 		UUID:     uuid,
