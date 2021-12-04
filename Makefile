@@ -45,6 +45,10 @@ call:
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Get '{"uuid":"00000000"}'
 	# 获取集合
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Get '{"uuid":"098f6bcd4621d373cade4e832627b4f6"}'
+	# 搜索集合
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"1122"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"es"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"t1"}'
 	# 加入成员,无参数
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add 
 	# 加入成员,集合不存在

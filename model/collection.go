@@ -59,16 +59,6 @@ func (this *CollectionDAO) Insert(_Collection *Collection) error {
 }
 
 func (this *CollectionDAO) Update(_Collection *Collection) error {
-	var count int64
-	err := this.conn.DB.Model(&Collection{}).Where("uuid = ?", _Collection.UUID).Count(&count).Error
-	if nil != err {
-		return err
-	}
-
-	if 0 == count {
-		return ErrCollectionNotFound
-	}
-
 	return this.conn.DB.Updates(_Collection).Error
 }
 
@@ -86,10 +76,28 @@ func (this *CollectionDAO) Delete(_uuid string) error {
 	return this.conn.DB.Where("uuid = ?", _uuid).Delete(&Collection{}).Error
 }
 
-func (this *CollectionDAO) List(_offset int64, _count int64) ([]*Collection, error) {
+func (this *CollectionDAO) List(_offset int64, _count int64) (int64, []*Collection, error) {
+	db := this.conn.DB.Model(&Collection{})
+	var count int64
+	res := db.Count(&count)
+	if nil != res.Error {
+		return 0, nil, res.Error
+	}
 	var Collections []*Collection
-	res := this.conn.DB.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&Collections)
-	return Collections, res.Error
+	res = db.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&Collections)
+	return count, Collections, res.Error
+}
+
+func (this *CollectionDAO) Search(_offset int64, _count int64, _name string) (int64, []*Collection, error) {
+	db := this.conn.DB.Model(&Collection{}).Where("name LIKE ?", "%"+_name+"%")
+	var count int64
+	res := db.Count(&count)
+	if nil != res.Error {
+		return 0, nil, res.Error
+	}
+	var Collections []*Collection
+	res = db.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&Collections)
+	return count, Collections, res.Error
 }
 
 func (this *CollectionDAO) QueryOne(_query *CollectionQuery) (*Collection, error) {
@@ -99,15 +107,15 @@ func (this *CollectionDAO) QueryOne(_query *CollectionQuery) (*Collection, error
 		db = db.Where("uuid = ?", _query.UUID)
 		hasWhere = true
 	}
-    // 没有where子句时，返回未找到错误
+	// 没有where子句时，返回未找到错误
 	if !hasWhere {
 		return nil, ErrCollectionNotFound
 	}
 
 	var collection Collection
 	err := db.Limit(1).Find(&collection).Error
-    if collection.UUID == "" {
-        return nil ,ErrCollectionNotFound
-    }
+	if collection.UUID == "" {
+		return nil, ErrCollectionNotFound
+	}
 	return &collection, err
 }

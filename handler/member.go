@@ -5,13 +5,13 @@ import (
 	"errors"
 	"ogm-group/model"
 
-    "github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/logger"
 	proto "github.com/xtech-cloud/ogm-msp-group/proto/group"
 )
 
 type Member struct{}
 
-func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp *proto.BlankResponse) error {
+func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp *proto.UuidResponse) error {
 	logger.Infof("Received Member.Add, req is %v", _req)
 	_rsp.Status = &proto.Status{}
 
@@ -27,6 +27,7 @@ func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp
 		return nil
 	}
 
+	//collection是否存在
 	daoCollection := model.NewCollectionDAO(nil)
 	query := model.CollectionQuery{
 		UUID: _req.Collection,
@@ -44,7 +45,7 @@ func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp
 		return err
 	}
 
-	// 0为无限制
+	// 容量是否足够，0为无限制
 	if collection.Capacity > 0 {
 		if uint64(count) >= collection.Capacity {
 			_rsp.Status.Code = 3
@@ -58,6 +59,7 @@ func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp
 		UUID:       uuid,
 		Collection: _req.Collection,
 		Element:    _req.Element,
+		Alias:      _req.Alias,
 	}
 
 	err = daoMember.Insert(member)
@@ -70,6 +72,44 @@ func (this *Member) Add(_ctx context.Context, _req *proto.MemberAddRequest, _rsp
 		return err
 	}
 
+	_rsp.Uuid = uuid
+	return nil
+}
+
+func (this *Member) Update(_ctx context.Context, _req *proto.MemberUpdateRequest, _rsp *proto.UuidResponse) error {
+	logger.Infof("Received Member.Update, req is %v", _req)
+	_rsp.Status = &proto.Status{}
+
+	if "" == _req.Uuid {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "uuid is required"
+		return nil
+	}
+
+	if "" == _req.Element {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "element is required"
+		return nil
+	}
+
+	if "" == _req.Alias {
+		_rsp.Status.Code = 1
+		_rsp.Status.Message = "alias is required"
+		return nil
+	}
+
+	dao := model.NewMemberDAO(nil)
+	member := model.Member{
+		UUID:    _req.Uuid,
+		Element: _req.Element,
+		Alias:   _req.Alias,
+	}
+	err := dao.Update(&member)
+	if nil != err {
+		_rsp.Status.Code = -1
+		_rsp.Status.Message = err.Error()
+		return nil
+	}
 	return nil
 }
 
@@ -97,12 +137,13 @@ func (this *Member) Get(_ctx context.Context, _req *proto.MemberGetRequest, _rsp
 		Uuid:       member.UUID,
 		Collection: member.Collection,
 		Element:    member.Element,
+		Alias:      member.Alias,
 	}
 
 	return nil
 }
 
-func (this *Member) Remove(_ctx context.Context, _req *proto.MemberRemoveRequest, _rsp *proto.BlankResponse) error {
+func (this *Member) Remove(_ctx context.Context, _req *proto.MemberRemoveRequest, _rsp *proto.UuidResponse) error {
 	logger.Infof("Received Member.Remove, req is %v", _req)
 	_rsp.Status = &proto.Status{}
 
@@ -119,6 +160,7 @@ func (this *Member) Remove(_ctx context.Context, _req *proto.MemberRemoveRequest
 		_rsp.Status.Message = err.Error()
 		return nil
 	}
+	_rsp.Uuid = _req.Uuid
 	return nil
 }
 
@@ -139,11 +181,7 @@ func (this *Member) List(_ctx context.Context, _req *proto.MemberListRequest, _r
 
 	dao := model.NewMemberDAO(nil)
 
-	total, err := dao.CountOfCollection(_req.Collection)
-	if nil != err {
-		return nil
-	}
-	members, err := dao.List(offset, count, _req.Collection)
+	total, members, err := dao.List(offset, count, _req.Collection)
 	if nil != err {
 		return nil
 	}
@@ -155,26 +193,62 @@ func (this *Member) List(_ctx context.Context, _req *proto.MemberListRequest, _r
 			Uuid:       member.UUID,
 			Collection: member.Collection,
 			Element:    member.Element,
+			Alias:      member.Alias,
 		}
 	}
 
 	return nil
 }
 
+func (this *Member) Search(_ctx context.Context, _req *proto.MemberSearchRequest, _rsp *proto.MemberListResponse) error {
+	logger.Infof("Received Member.Search, req is %v", _req)
+	_rsp.Status = &proto.Status{}
+
+	offset := int64(0)
+	count := int64(100)
+
+	if _req.Offset > 0 {
+		offset = _req.Offset
+	}
+
+	if _req.Count > 0 {
+		count = _req.Count
+	}
+
+	dao := model.NewMemberDAO(nil)
+
+	total, members, err := dao.Search(offset, count, _req.Collection, _req.Element, _req.Alias)
+	if nil != err {
+		return nil
+	}
+
+	_rsp.Total = uint64(total)
+	_rsp.Entity = make([]*proto.MemberEntity, len(members))
+	for i, member := range members {
+		_rsp.Entity[i] = &proto.MemberEntity{
+			Uuid:       member.UUID,
+			Collection: member.Collection,
+			Element:    member.Element,
+			Alias:      member.Alias,
+		}
+	}
+
+	return nil
+}
 func (this *Member) Where(_ctx context.Context, _req *proto.MemberWhereRequest, _rsp *proto.MemberWhereResponse) error {
 	logger.Infof("Received Member.Where, req is %v", _req)
 	_rsp.Status = &proto.Status{}
 
-	if "" == _req.Element{
+	if "" == _req.Element {
 		_rsp.Status.Code = 1
 		_rsp.Status.Message = "element is required"
 		return nil
 	}
 
 	dao := model.NewMemberDAO(nil)
-    query := model.MemberQuery {
-        Element: _req.Element,
-    }
+	query := model.MemberQuery{
+		Element: _req.Element,
+	}
 	members, err := dao.QueryMany(&query)
 	if nil != err {
 		return nil
@@ -182,7 +256,7 @@ func (this *Member) Where(_ctx context.Context, _req *proto.MemberWhereRequest, 
 
 	_rsp.Collection = make([]string, len(members))
 	for i, member := range members {
-		_rsp.Collection[i] = member.Collection;
+		_rsp.Collection[i] = member.Collection
 	}
 
 	return nil

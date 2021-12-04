@@ -9,6 +9,7 @@ type Member struct {
 	UUID       string `gorm:"column:uuid;type:char(32);not null;unique;primaryKey"`
 	Collection string `gorm:"column:collection;type:char(32);not null;"`
 	Element    string `gorm:"column:element;type:char(32);not null;"`
+    Alias      string `gorm:"column:alias;type:varchar(128);not null;default:''"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
@@ -71,16 +72,6 @@ func (this *MemberDAO) Insert(_member *Member) error {
 }
 
 func (this *MemberDAO) Update(_member *Member) error {
-	var count int64
-	err := this.conn.DB.Model(&Member{}).Where("uuid = ?", _member.UUID).Count(&count).Error
-	if nil != err {
-		return err
-	}
-
-	if 0 == count {
-		return ErrMemberNotFound
-	}
-
 	return this.conn.DB.Updates(_member).Error
 }
 
@@ -98,15 +89,42 @@ func (this *MemberDAO) Delete(_uuid string) error {
 	return this.conn.DB.Where("uuid = ?", _uuid).Delete(&Member{}).Error
 }
 
-func (this *MemberDAO) List(_offset int64, _count int64, _collection string) ([]*Member, error) {
+func (this *MemberDAO) List(_offset int64, _count int64, _collection string) (int64, []*Member, error) {
 	var members []*Member
-	db := this.conn.DB
+	db := this.conn.DB.Model(&Member{})
 	if "" != _collection {
 		db = db.Where("collection = ?", _collection)
 	}
+    var count int64
+    err := db.Count(&count).Error
+    if nil != err {
+        return 0, nil, err
+    }
 	res := db.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&members)
-	return members, res.Error
+	return count, members, res.Error
 }
+
+func (this *MemberDAO) Search(_offset int64, _count int64, _collection string, _element string, _alias string) (int64, []*Member, error) {
+	var members []*Member
+	db := this.conn.DB.Model(&Member{})
+	if "" != _collection {
+		db = db.Where("collection = ?", _collection)
+	}
+	if "" != _element {
+		db = db.Where("element LIKE ?", "%"+_element+"%")
+	}
+	if "" != _alias {
+		db = db.Where("alias LIKE ?", "%"+_alias+"%")
+	}
+    var count int64
+    err := db.Count(&count).Error
+    if nil != err {
+        return 0, nil, err
+    }
+	res := db.Offset(int(_offset)).Limit(int(_count)).Order("created_at desc").Find(&members)
+	return count, members, res.Error
+}
+
 
 func (this *MemberDAO) QueryOne(_query *MemberQuery) (*Member, error) {
 	db := this.conn.DB.Model(&Member{})
