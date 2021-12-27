@@ -295,9 +295,9 @@ func (this *Element) Where(_ctx context.Context, _req *proto.ElementWhereRequest
 		return nil
 	}
 
-	_rsp.Collection = make([]string, len(elements))
-	for i, element := range elements {
-		_rsp.Collection[i] = element.Collection
+	_rsp.Uuid = make(map[string]string, len(elements))
+	for _, element := range elements {
+		_rsp.Uuid[element.Collection] = element.UUID
 	}
 
 	return nil
