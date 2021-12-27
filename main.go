@@ -39,7 +39,7 @@ func main() {
 	// Register Handler
 	proto.RegisterHealthyHandler(service.Server(), new(handler.Healthy))
 	proto.RegisterCollectionHandler(service.Server(), new(handler.Collection))
-	proto.RegisterMemberHandler(service.Server(), new(handler.Member))
+	proto.RegisterElementHandler(service.Server(), new(handler.Element))
 
 	app, _ := filepath.Abs(os.Args[0])
 

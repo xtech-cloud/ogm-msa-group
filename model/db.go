@@ -67,7 +67,7 @@ func AutoMigrateDatabase() {
 	if nil != err {
 		logger.Fatal(err)
 	}
-	err = DefaultConn.DB.AutoMigrate(&Member{})
+	err = DefaultConn.DB.AutoMigrate(&Element{})
 	if nil != err {
 		logger.Fatal(err)
 	}

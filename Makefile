@@ -2,6 +2,7 @@ APP_NAME := ogm-group
 BUILD_VERSION   := $(shell git tag --contains)
 BUILD_TIME      := $(shell date "+%F %T")
 COMMIT_SHA1     := $(shell git rev-parse HEAD )
+collection := $(shell cat /tmp/ogm-group-collection)
 
 .PHONY: build
 build:
@@ -44,43 +45,43 @@ call:
 	# 获取集合，不存在
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Get '{"uuid":"00000000"}'
 	# 获取集合
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Get '{"uuid":"098f6bcd4621d373cade4e832627b4f6"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Get '{"uuid":"${collection}"}'
 	# 搜索集合
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"1122"}'
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"es"}'
 	gomu --registry=etcd --client=grpc call xtc.ogm.group Collection.Search '{"name":"t1"}'
 	# 加入成员,无参数
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add 
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add 
 	# 加入成员,集合不存在
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"00000000"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"00000000"}'
 	# 加入成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"098f6bcd4621d373cade4e832627b4f6", "element":"0001"}'
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"098f6bcd4621d373cade4e832627b4f6", "element":"0002"}'
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"098f6bcd4621d373cade4e832627b4f6", "element":"0003"}'
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"5a105e8b9d40e1329780d62ea2265d8a", "element":"0001"}'
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Add '{"collection":"5a105e8b9d40e1329780d62ea2265d8a", "element":"0002"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"${collection}", "key":"0001", "label":["a1","a2"]}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"${collection}", "key":"0002"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"${collection}", "key":"0003"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"${collection}", "key":"0001"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Add '{"collection":"${collection}", "key":"0002"}'
 	# 定位成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Where '{"element":"0002"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Where '{"key":"0002"}'
 	# 列举成员,集合不存在
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.List '{"collection":"00000000"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.List '{"collection":"00000000"}'
 	# 列举成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.List 
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.List '{"collection":"098f6bcd4621d373cade4e832627b4f6"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.List 
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.List '{"collection":"${collection}"}'
 	# 列举成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.List '{"collection":"098f6bcd4621d373cade4e832627b4f6", "offset":1, "count":1}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.List '{"collection":"${collection}", "offset":1, "count":1}'
 	# 获取成员, 无参数
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Get 
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Get 
 	# 获取成员, 不存在 
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Get '{"uuid":"0000000"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Get '{"uuid":"0000000"}'
 	# 获取成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Get '{"uuid":"0000000"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Get '{"uuid":"0000000"}'
 	# 删除成员，无参数
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Remove 
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Remove 
 	# 删除成员，不存在
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Remove '{"uuid":"0000000"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Remove '{"uuid":"0000000"}'
 	# 删除成员
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Remove '{"uuid":"7a07a596be5f45821274550975675323"}'
-	gomu --registry=etcd --client=grpc call xtc.ogm.group Member.Remove '{"uuid":"fe141627a1cadad438b1203fb086b0a4"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Remove '{"uuid":"7a07a596be5f45821274550975675323"}'
+	gomu --registry=etcd --client=grpc call xtc.ogm.group Element.Remove '{"uuid":"fe141627a1cadad438b1203fb086b0a4"}'
 
 .PHONY: post
 post:
