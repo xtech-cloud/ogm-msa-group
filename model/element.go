@@ -109,13 +109,13 @@ func (this *ElementDAO) Search(_offset int64, _count int64, _collection string, 
 	var elements []*Element
 	db := this.conn.DB.Model(&Element{})
 	if "" != _collection {
-		db = db.Where("collection = ?", _collection)
+		db = db.Where("`collection` = ?", _collection)
 	}
 	if "" != _key {
-		db = db.Where("key LIKE ?", "%"+_key+"%")
+		db = db.Where("`key` LIKE ?", "%"+_key+"%")
 	}
 	if "" != _alias {
-		db = db.Where("alias LIKE ?", "%"+_alias+"%")
+		db = db.Where("`alias` LIKE ?", "%"+_alias+"%")
 	}
 	var count int64
 	err := db.Count(&count).Error
@@ -130,15 +130,15 @@ func (this *ElementDAO) QueryOne(_query *ElementQuery) (*Element, error) {
 	db := this.conn.DB.Model(&Element{})
 	hasWhere := false
 	if "" != _query.UUID {
-		db = db.Where("uuid = ?", _query.UUID)
+		db = db.Where("`uuid` = ?", _query.UUID)
 		hasWhere = true
 	}
 	if "" != _query.Collection {
-		db = db.Where("collection = ?", _query.Collection)
+		db = db.Where("`collection` = ?", _query.Collection)
 		hasWhere = true
 	}
 	if "" != _query.Key {
-		db = db.Where("key = ?", _query.Key)
+		db = db.Where("`key` = ?", _query.Key)
 		hasWhere = true
 	}
 	if !hasWhere {
@@ -165,7 +165,7 @@ func (this *ElementDAO) QueryMany(_query *ElementQuery) ([]*Element, error) {
 		hasWhere = true
 	}
 	if "" != _query.Key {
-		db = db.Where("key = ?", _query.Key)
+		db = db.Where("`key` = ?", _query.Key)
 		hasWhere = true
 	}
 	if !hasWhere {
